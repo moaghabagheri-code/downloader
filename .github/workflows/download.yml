@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       url:
-        description: 'لینک YouTube'
+        description: 'لینک کامل YouTube'
         required: true
         type: string
 
@@ -12,18 +12,31 @@ jobs:
   download:
     runs-on: ubuntu-latest
     steps:
-    - name: Install yt-dlp
+    - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install -y ffmpeg
-        pip install yt-dlp
+        sudo apt install -y ffmpeg python3-pip
+        pip install yt-dlp --upgrade
         
-    - name: Download Video
+    - name: Download with yt-dlp (bypass)
       run: |
-        yt-dlp --no-check-certificate --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" -f "best[ext=mp4]" -o "video.mp4" "${{ github.event.inputs.url }}"
-        
-    - name: Upload
+        yt-dlp \
+          --extracter-args "youtube:player_client=web" \
+          --add-header "User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" \
+          --add-header "Accept-Language:en-US,en;q=0.9" \
+          --no-check-certificate \
+          --retries 10 \
+          --fragment-retries 10 \
+          --sleep-requests 1 \
+          --sleep-interval 5 \
+          --max-sleep-interval 15 \
+          --limit-rate 2M \
+          -f "best[ext=mp4]" \
+          -o "video.mp4" \
+          "${{ github.event.inputs.url }}"
+          
+    - name: Upload video
       uses: actions/upload-artifact@v4
       with:
-        name: video
+        name: my-video
         path: ./video.mp4
