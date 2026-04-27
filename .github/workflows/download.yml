@@ -12,20 +12,15 @@ jobs:
   download:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-        
     - name: Install yt-dlp
-      run: pip install yt-dlp
-      
+      run: |
+        sudo apt update
+        sudo apt install -y ffmpeg
+        pip install yt-dlp
+        
     - name: Download Video
       run: |
-        yt-dlp -f "best[ext=mp4]" -o "video.mp4" "${{ github.event.inputs.url }}"
+        yt-dlp --no-check-certificate --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" -f "best[ext=mp4]" -o "video.mp4" "${{ github.event.inputs.url }}"
         
     - name: Upload
       uses: actions/upload-artifact@v4
