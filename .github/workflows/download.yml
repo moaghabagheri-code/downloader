@@ -1,0 +1,34 @@
+name: YouTube Downloader
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'لینک YouTube'
+        required: true
+        type: string
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        
+    - name: Install yt-dlp
+      run: pip install yt-dlp
+      
+    - name: Download Video
+      run: |
+        yt-dlp -f "best[ext=mp4]" -o "video.mp4" "${{ github.event.inputs.url }}"
+        
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: video
+        path: ./video.mp4
